@@ -1,0 +1,43 @@
+name: Weekly Code Audit
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Every Monday at 9am UTC
+jobs:
+  opencode:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Run OpenCode
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/deepseek-v4.1-flash
+          prompt: |
+            Review the codebase for TODO, FIXME, and HACK comments.
+            Group them by priority and create an issue with a summary.
+# prompt: |
+#   Compare the documentation (README.md, docs/) with the actual codebase.
+#   Look for: outdated API descriptions, broken code examples,
+#   references to renamed or deleted files.
+#   Create a PR fixing what you can, and an issue listing
+#   what needs human attention.            
+# prompt: |
+#   Review all open issues and PRs. Find items with no activity
+#   in the last 90 days. For each stale item:
+#   - Leave a comment asking if it's still relevant
+#   - If it looks abandoned, suggest closing with explanation
+#   Skip issues labeled "long-term" or "roadmap".
+# prompt: |
+#   Analyze the codebase and test files. Find modules and functions
+#   that lack test coverage. Prioritize by: number of dependents,
+#   frequency of recent changes, complexity.
+#   Create an issue with a prioritized list of what needs tests.
